@@ -1,0 +1,47 @@
+version: 2.1
+
+jobs:
+  # CPU-bound ジョブ: Jest を parallelism で分散実行
+  test-cpu-bound:
+    docker:
+      - image: cimg/node:22.0
+    resource_class: large          # Step 3 で large.gen2 に変更する
+    parallelism: 4
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - npm-{{ checksum "package.json" }}
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - save_cache:
+          key: npm-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+      - run:
+          name: Run CPU-bound tests
+          command: |
+            npx jest tests/cpu-bound.test.ts \
+              --testPathPattern="$(circleci tests glob 'tests/cpu-bound.test.ts' | circleci tests split)" \
+              --forceExit
+
+  # Network-bound ジョブ: npm ci のみが実質的な処理（CPU はほぼアイドル）
+  test-network-bound:
+    docker:
+      - image: cimg/node:22.0
+    resource_class: medium         # Step 3 で medium.gen2 に変更する
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies (no cache)
+          command: npm ci --prefer-offline=false
+      - run:
+          name: Run smoke tests
+          command: npx jest tests/network-bound.test.ts --forceExit
+
+workflows:
+  build-and-test:
+    jobs:
+      - test-cpu-bound
+      - test-network-bound
