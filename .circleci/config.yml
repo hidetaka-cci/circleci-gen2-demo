@@ -5,7 +5,7 @@ jobs:
   test-cpu-bound:
     docker:
       - image: cimg/node:22.0
-    resource_class: large          # Step 3 で large.gen2 に変更する
+    resource_class: large.gen2
     parallelism: 4
     steps:
       - checkout
@@ -30,7 +30,7 @@ jobs:
   test-network-bound:
     docker:
       - image: cimg/node:22.0
-    resource_class: medium         # Step 3 で medium.gen2 に変更する
+    resource_class: medium.gen2
     steps:
       - checkout
       - run:
