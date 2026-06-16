@@ -16,13 +16,13 @@ describe("Primes - range 2", () => {
 });
 
 describe("Fibonacci - set 1", () => {
-  it("computes fib(38)", () => {
-    expect(fib(38)).toBe(39088169);
+  it("computes fib(44)", () => {
+    expect(fib(44)).toBe(701408733);
   });
 });
 
 describe("Fibonacci - set 2", () => {
-  it("computes fib(38)", () => {
-    expect(fib(38)).toBe(39088169);
+  it("computes fib(44)", () => {
+    expect(fib(44)).toBe(701408733);
   });
 });
