@@ -26,16 +26,19 @@ jobs:
               --testPathPattern="$(circleci tests glob 'tests/cpu-bound.test.ts' | circleci tests split)" \
               --forceExit
 
-  # Network-bound ジョブ: npm ci のみが実質的な処理（CPU はほぼアイドル）
+  # Network-bound ジョブ: キャッシュヒット後は CPU がほぼアイドル
   test-network-bound:
     docker:
       - image: cimg/node:22.0
     resource_class: medium.gen2
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - npm-{{ checksum "package.json" }}
       - run:
-          name: Install dependencies (no cache)
-          command: npm ci --prefer-offline=false
+          name: Install dependencies (cache hit)
+          command: npm ci
       - run:
           name: Run smoke tests
           command: npx jest tests/network-bound.test.ts --forceExit
@@ -44,4 +47,6 @@ workflows:
   build-and-test:
     jobs:
       - test-cpu-bound
-      - test-network-bound
+      - test-network-bound:
+          requires:
+            - test-cpu-bound
